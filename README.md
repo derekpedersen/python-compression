@@ -22,3 +22,9 @@ pip3 install Flask
 export FLASK_APP=run.py
 export FLASK_ENV=development
 ```
+
+## Testing
+
+```
+http://127.0.0.1:5000/file-compress?filename=sample_ecg_raw.bin
+```
