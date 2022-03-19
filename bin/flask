@@ -1,4 +1,4 @@
-#!/home/derek/go/src/github.com/derekpedersen/python-compression-api/bin/python3
+#!/Users/derek/go/src/github.com/derekpedersen/python-compression/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

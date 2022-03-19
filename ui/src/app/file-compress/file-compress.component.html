@@ -1,0 +1,32 @@
+<mat-card>
+    <mat-card-title>
+        Let's Get Compressin'
+    </mat-card-title>
+    <mat-card-subtitle>
+        Upload and then compress a file
+    </mat-card-subtitle>
+    <mat-card-actions>
+        <button type="button" mat-raised-button (click)="fileInput.click()">
+            Choose File
+        </button>
+        <input hidden type="file" (change)="onChange($event)" #fileInput>
+        <button *ngIf="isReadyToUpload()" (click)="uploadFile()" mat-button>
+            Upload
+        </button>
+        <button *ngIf="isReadyToCompress()" (click)="compressFile(uploaded)" mat-button>
+            Compress
+        </button>
+    </mat-card-actions>
+    <mat-card-content  style="margin: 0 auto;">
+        Original File Name: {{ compressed.originalFileName }}
+        Original File Size: {{ compressed.originalFileSize }}
+
+        Compressed File Name: {{ compressed.compressedFileName }}
+        Compressed File Size: {{ compressed.compressedFileSize }}
+
+        Size Difference: {{ compressed.sizeDifference }}
+        <button *ngIf="isReadyToDownload()" (click)="downloadFile(compressed.compressedFileName)" mat-button>
+            Download
+        </button>
+    </mat-card-content>
+</mat-card>

@@ -4,7 +4,9 @@ This API is responsible for compressing binary files so that they can be more ea
 
 ## Development
 
-This program was developed on a Eluktronics laptop running Linux Mint 19 and Python3
+This program assumes you already have Python3 installed. 
+
+Main development was done on Linux Mint 19, but the program should be compatible with MacOS. Do not personally have a Windows machine on which this could be tested but assume it would work on there as well.
 
 The folowing was used to initiate the project:
 
