@@ -28,94 +28,90 @@ class FileCompare:
     sizeDifference = 0
 
 
-def isLeaf(root):
-    return root.left is None and root.right is None
-
-
 class Node:
-    def __init__(self, ch, freq, left=None, right=None):
-        self.ch = ch
-        self.freq = freq
+    def __init__(self, prob, symbol, left=None, right=None):
+        self.prob = prob
+        self.symbol = symbol
         self.left = left
         self.right = right
+        self.code = ''
 
-    def __lt__(self, other):
-        return self.freq < other.freq
-
-
-def encode(root, s, code):
-
-    if root is None:
-        return
-
-    if isLeaf(root):
-        code[root.ch] = s if len(s) > 0 else '1'
-
-    encode(root.left, s + '0', code)
-    encode(root.right, s + '1', code)
+codes = dict()
 
 
-def decode(root, index, s):
-
-    if root is None:
-        return index
-
-    if isLeaf(root):
-        print(root.ch, end='')
-        return index
-
-    index = index + 1
-    root = root.left if s[index] == '0' else root.right
-    return decode(root, index, s)
+def _to_Bytes(data):
+  b = bytearray()
+  for i in range(0, len(data), 8):
+    b.append(int(data[i:i+8], 2))
+  return bytes(b)
 
 
-def compress(text):
+def _codes(node, val=''):
+    # huffman code for current node
+    newVal = val + str(node.code)
 
-    if len(text) == 0:
-        return
+    if(node.left):
+        _codes(node.left, newVal)
+    if(node.right):
+        _codes(node.right, newVal)
 
-    freq = {i: text.count(i) for i in set(text)}
+    if(not node.left and not node.right):
+        codes[node.symbol] = newVal
+         
+    return codes        
 
-    pq = [Node(k, v) for k, v in freq.items()]
-    heapq.heapify(pq)
+def _probability(data):
+    symbols = dict()
+    for element in data:
+        if symbols.get(element) == None:
+            symbols[element] = 1
+        else: 
+            symbols[element] += 1     
+    return symbols
 
-    while len(pq) != 1:
+def _encoded(data, coding):
+    encoding_output = []
+    for c in data:
+        encoding_output.append(coding[c])
+        
+    string = ''.join([str(item) for item in encoding_output])    
+    return string
 
-        left = heappop(pq)
-        right = heappop(pq)
-
-        total = left.freq + right.freq
-        heappush(pq, Node(None, total, left, right))
-
-    root = pq[0]
-
-    code = {}
-    encode(root, '', code)
-
-    s = ''
-    for c in text:
-        s += code.get(c)
-
-    return s
-
-
-@app.route('/api/file/compress', methods=['GET'])
-def file_compress():
-    originalfilename = request.args["filename"]
-    originalfile = open(originalfilename, 'rb')
-    arr = list(originalfile.read())
-    originalfile.close()
-    originalsize = os.path.getsize(originalfile.name)
-    comp = compress(arr)
-    compressedfile = open("_compressed_" + originalfilename, "a")
-    compressedfile.write(comp)
-    compressedfile.close()
-    compressedsize = os.path.getsize(compressedfile.name)
-
-    compare = FileCompare(originalfile.name, originalsize, compressedfile.name, compressedsize)
-
-    return compare.toJson()
-
+def _to_Huffman(data):
+    symbol_with_probs = _probability(data)
+    symbols = symbol_with_probs.keys()
+    probabilities = symbol_with_probs.values()
+    print("symbols: ", symbols)
+    print("probabilities: ", probabilities)
+    
+    nodes = []
+    
+    # converting symbols and probabilities into huffman tree nodes
+    for symbol in symbols:
+        nodes.append(Node(symbol_with_probs.get(symbol), symbol))
+    
+    while len(nodes) > 1:
+        # sort all the nodes in ascending order based on their probability
+        nodes = sorted(nodes, key=lambda x: x.prob)
+    
+        # pick 2 smallest nodes
+        right = nodes[0]
+        left = nodes[1]
+    
+        left.code = 0
+        right.code = 1
+    
+        # combine the 2 smallest nodes to create new node
+        newNode = Node(left.prob+right.prob, left.symbol+right.symbol, left, right)
+    
+        nodes.remove(left)
+        nodes.remove(right)
+        nodes.append(newNode)
+            
+    _to_Huffman = _codes(nodes[0])
+    encoded_output = _encoded(data,_to_Huffman)
+    return encoded_output 
+    
 
 @app.route('/api/file/list', methods=['GET'])
 def file_list():
@@ -139,3 +135,21 @@ def upload_file():
       f = request.files['file']
       f.save(secure_filename(f.filename))
       return jsonify(f.filename)
+
+
+@app.route('/api/file/compress', methods=['GET'])
+def file_compress():
+    originalfilename = request.args["filename"]
+    originalfile = open(originalfilename, 'rb')
+    data = originalfile.read()
+    originalfile.close()
+    originalsize = os.path.getsize(originalfile.name)
+    encoding = _to_Huffman(data)
+    compressedfile = open("_compressed_" + originalfilename, 'wb')
+    compressedfile.write(_to_Bytes(encoding))
+    compressedfile.close()
+    compressedsize = os.path.getsize(compressedfile.name)
+
+    compare = FileCompare(originalfile.name, originalsize, compressedfile.name, compressedsize)
+
+    return compare.toJson()
