@@ -2,7 +2,7 @@
   <mat-card-title> Let's Get Compressin' </mat-card-title>
   <mat-card-subtitle> Upload and then compress a file </mat-card-subtitle>
   <mat-card-actions>
-    <button type="button" mat-raised-button (click)="fileInput.click()" color="accent">
+    <button type="button" mat-raised-button (click)="fileInput.click()">
       Choose File
     </button>
     <input hidden type="file" (change)="onChange($event)" #fileInput />
@@ -21,7 +21,7 @@
       <mat-list-item>Compressed File Size: {{ compressed.compressedFileSize }}</mat-list-item>
       <mat-list-item>Size Difference: {{ compressed.sizeDifference }}</mat-list-item>
       <mat-list-item>
-        <button (click)="downloadFile(compressed.compressedFileName)" mat-button>
+        <button (click)="downloadFile(compressed.compressedFileName)" mat-raised-button color="accent">
           Download
         </button>
       </mat-list-item>

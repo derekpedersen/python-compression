@@ -3,7 +3,6 @@ from flask import request, jsonify, send_file
 from werkzeug.utils import secure_filename
 
 import glob
-
 import os
 import json
 
@@ -60,6 +59,7 @@ def _codes(node, val=''):
          
     return codes        
 
+
 def _probability(data):
     symbols = dict()
     for element in data:
@@ -69,6 +69,7 @@ def _probability(data):
             symbols[element] += 1     
     return symbols
 
+
 def _encoded(data, coding):
     encoding_output = []
     for c in data:
@@ -77,12 +78,11 @@ def _encoded(data, coding):
     string = ''.join([str(item) for item in encoding_output])    
     return string
 
+
 def _to_Huffman(data):
     symbol_with_probs = _probability(data)
     symbols = symbol_with_probs.keys()
     probabilities = symbol_with_probs.values()
-    print("symbols: ", symbols)
-    print("probabilities: ", probabilities)
     
     nodes = []
     
@@ -123,6 +123,7 @@ def file_list():
     if request.args["type"] == "original":
         return jsonify(glob.glob('!compressed'))
     return jsonify(glob.glob('*.bin'))
+
 
 @app.route('/api/file/download', methods=['GET'])
 def file_download ():
